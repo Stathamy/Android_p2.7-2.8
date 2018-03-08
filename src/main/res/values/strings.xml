@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="qusetion_text">My question?</string>
+    <string name="true_button">True</string>
+    <string name="false_button">False</string>
+    <string name="correct_toast">Correct</string>
+    <string name="incorrect_toast">InCorrect</string>
+    <string name="question_1">11111111</string>
+    <string name="question_2">22222222</string>
+    <string name="question_3">33333333</string>
+    <string name="question_4">44444444</string>
+</resources>

@@ -9,14 +9,16 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
-    private Button mNextButton;
-    private Button mPrevButton;
+    private ImageButton mNextButton;
+    private ImageButton mPrevButton;
+
     private TextView mQuestionTextView;
     private Question[] mQuestionBank=new Question[]{
             new Question(R.string.question_1,true),
@@ -31,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mTrueButton=(Button)findViewById(R.id.button3);
         mFalseButton=(Button)findViewById(R.id.button4);
-        mNextButton =(Button)findViewById(R.id.button5);
-        mPrevButton=(Button)findViewById(R.id.button6);
+        mNextButton =(ImageButton)findViewById(R.id.button5);
+        mPrevButton=(ImageButton)findViewById(R.id.button6);
         mQuestionTextView=(TextView) findViewById(R.id.question_text_view);
         int question=mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
