@@ -4,6 +4,8 @@ package com.example.admin.myapplication;
 *  dowhat：P61  3.7  3.8
 *  author：Joe
 * */
+import android.app.Activity;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,13 +22,14 @@ public class MainActivity extends AppCompatActivity {
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mNextButton;
-    private ImageButton mPrevButton;
-    private int alltime=0;
+    private Button mCheatButton;
     private TextView mQuestionTextView;
-    private int RightResultTimes=0;
     private int mCurrentIndex = 0;
     private static final String TAG="MainActivity";
     private static final String KEY_INDEX="index";
+    private static final int REQUEST_CODE_CHEAT = 0;
+    private boolean mIsCheater;
+
     private Question[] mQuestionBank=new Question[]{
             new Question(R.string.question_1,true,0),
             new Question(R.string.question_2,false,0),
@@ -40,17 +43,42 @@ public class MainActivity extends AppCompatActivity {
         savedInstanceState.putInt(KEY_INDEX,mCurrentIndex);
     }
     @Override
+    protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        if(resultCode!= Activity.RESULT_OK){
+            return;
+        }
+        if(requestCode==REQUEST_CODE_CHEAT){
+            if(data==null){
+                return;
+            }
+            mIsCheater=CheatActivity.wasAnswerShown(data);
+        }
+    }
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG,"onCreate(Bundle)called");
         setContentView(R.layout.activity_main);
         if(savedInstanceState!=null){
+            //用户旋转过后activity会重新加载导致显示的是第一个题
             mCurrentIndex=savedInstanceState.getInt(KEY_INDEX,0);
+            //defaultValue代表如果不是...值就更改
+
+            //防止用户作弊->旋转MainActivity:将mIsCheater传回
+            mIsCheater=savedInstanceState.getBoolean(KEY_INDEX,true);
         }
         mTrueButton=(Button)findViewById(R.id.button3);
         mFalseButton=(Button)findViewById(R.id.button4);
         mNextButton =(ImageButton)findViewById(R.id.button5);
-        mPrevButton=(ImageButton)findViewById(R.id.button6);
+        mCheatButton=(Button)findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean answerIsTrue=mQuestionBank[mCurrentIndex].isAnswerTrue();
+                Intent intent= CheatActivity.newIntent(MainActivity.this,answerIsTrue);
+                startActivityForResult(intent,REQUEST_CODE_CHEAT);
+            }
+        });
         mQuestionTextView=(TextView) findViewById(R.id.question_text_view);
         int question=mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
@@ -87,17 +115,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentIndex=(mCurrentIndex+1)%mQuestionBank.length;
+                mIsCheater=true;//防止用户作弊->点击NEXT回到偷看的题目上:将mIsCheater值置为true
                 updateQuestion();
             }
          });
-        mPrevButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mCurrentIndex=(mCurrentIndex+mQuestionBank.length-1)%mQuestionBank.length;
-              //在设置向前时必须加上mQuestionBank.length以保证mCurrentIndex>0,否则会闪退。
-                updateQuestion();
-            }
-        });
+
         updateQuestion();
     }
     private void updateQuestion(){
@@ -107,38 +129,22 @@ public class MainActivity extends AppCompatActivity {
     private void checkAnswer(boolean userPressTrue){
         boolean answerIsTrue=mQuestionBank[mCurrentIndex].isAnswerTrue();
         int messageResId =0;
-        int questionstate=mQuestionBank[mCurrentIndex].getState();
 
-        if(questionstate==0) {
-            alltime++;
+        if(mIsCheater){messageResId=R.string.judgment_toast;}else{
+
+
             if (userPressTrue == answerIsTrue) {
                 messageResId = R.string.correct_toast;
-                RightResultTimes++;
+
             } else {
                 messageResId = R.string.incorrect_toast;
-            }
+            }}
             Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
-        }
 
-        if(alltime==mQuestionBank.length){
-            try{//等待1s显示
-                Thread.sleep(500);
-            }catch(Exception e){
 
-            }
-            double Result=(double) RightResultTimes/(double) alltime;
-            String temp=Double.toString(Result);//以下7部过程是将double类型转化为String+%号
-            int start=temp.indexOf(".");
-            String result=(temp.substring(0,start+2));
-            double d = Double.parseDouble(result);
-            d=d*100;
-            temp=Double.toString(d);
-            result=temp+"%";
-            Toast.makeText(this, result, Toast.LENGTH_SHORT).show();}
+
     }
-    private void diaplayScore(){
-        Toast.makeText(this,RightResultTimes,Toast.LENGTH_SHORT).show();
-    }
+
     @Override
     protected void onStart() {
         super.onStart();
