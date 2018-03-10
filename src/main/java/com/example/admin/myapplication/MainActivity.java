@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentIndex=(mCurrentIndex+1)%mQuestionBank.length;
-                mIsCheater=true;//防止用户作弊->点击NEXT回到偷看的题目上:将mIsCheater值置为true
+                mIsCheater=true;//防止用户作弊->连续点击NEXT回到偷看的题目上:将mIsCheater值置为true
                 updateQuestion();
             }
          });
