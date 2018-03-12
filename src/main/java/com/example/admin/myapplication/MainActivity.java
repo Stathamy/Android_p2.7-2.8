@@ -25,10 +25,14 @@ public class MainActivity extends AppCompatActivity {
     private Button mCheatButton;
     private TextView mQuestionTextView;
     private int mCurrentIndex = 0;
+    public int sur_t=3;
+    public int has_t=0;
     private static final String TAG="MainActivity";
     private static final String KEY_INDEX="index";
+    private static final String KEY_INDEX2="index2";
     private static final int REQUEST_CODE_CHEAT = 0;
     private boolean mIsCheater;
+    private boolean mhas_t;
 
     private Question[] mQuestionBank=new Question[]{
             new Question(R.string.question_1,true,0),
@@ -36,11 +40,16 @@ public class MainActivity extends AppCompatActivity {
             new Question(R.string.question_3,false,0),
             new Question(R.string.question_4,true,0)
     };
+
+    public MainActivity() {
+    }
+
     @Override
     public void  onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG,"onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX,mCurrentIndex);
+        //savedInstanceState.putBoolean(KEY_INDEX2,mhas_t);//*****
     }
     @Override
     protected void onActivityResult(int requestCode,int resultCode,Intent data){
@@ -65,7 +74,9 @@ public class MainActivity extends AppCompatActivity {
             //defaultValue代表如果不是...值就更改
 
             //防止用户作弊->旋转MainActivity:将mIsCheater传回
+
             mIsCheater=savedInstanceState.getBoolean(KEY_INDEX,true);
+            mhas_t=savedInstanceState.getBoolean(KEY_INDEX,true);
         }
         mTrueButton=(Button)findViewById(R.id.button3);
         mFalseButton=(Button)findViewById(R.id.button4);
@@ -75,7 +86,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 boolean answerIsTrue=mQuestionBank[mCurrentIndex].isAnswerTrue();
-                Intent intent= CheatActivity.newIntent(MainActivity.this,answerIsTrue);
+                boolean has_time=mQuestionBank[mCurrentIndex].getCheated();
+                Intent intent= CheatActivity.newIntent(MainActivity.this,answerIsTrue,has_time);
                 startActivityForResult(intent,REQUEST_CODE_CHEAT);
             }
         });
@@ -115,7 +127,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 mCurrentIndex=(mCurrentIndex+1)%mQuestionBank.length;
-                mIsCheater=true;//防止用户作弊->点击NEXT回到偷看的题目上:将mIsCheater值置为true
+                mIsCheater=false;//防止用户作弊->点击NEXT回到偷看的题目上:将mIsCheater值置为true
+                                    //以上修改仍存在问题：用户一旦点击NEXT按钮就违规了，不能实现用户随意选答
                 updateQuestion();
             }
          });
@@ -128,17 +141,38 @@ public class MainActivity extends AppCompatActivity {
     }
     private void checkAnswer(boolean userPressTrue){
         boolean answerIsTrue=mQuestionBank[mCurrentIndex].isAnswerTrue();
+        boolean has_time=mQuestionBank[mCurrentIndex].getCheated();
         int messageResId =0;
 
-        if(mIsCheater){messageResId=R.string.judgment_toast;}else{
-
-
+        if(mIsCheater){
+            if(!mhas_t){
+            has_t++;}
+            int a =sur_t-has_t;
+            switch (a) {
+                case 0:
+                    messageResId = R.string.a0;//sur_t-has_t/judgment_toast
+                    mCheatButton.setEnabled(false);//当可查看次数减为0时，禁用cheat按钮
+                    break;
+                case 1:
+                    messageResId = R.string.a1;
+                    break;
+                case 2:
+                    messageResId = R.string.a2;
+                    break;
+                case 3:
+                    messageResId = R.string.a3;
+                    break;
+                default:
+                    messageResId = R.string.ad;
+            }
+        }else{
             if (userPressTrue == answerIsTrue) {
                 messageResId = R.string.correct_toast;
 
             } else {
                 messageResId = R.string.incorrect_toast;
             }}
+
             Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
 
 

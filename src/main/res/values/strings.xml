@@ -13,5 +13,9 @@
     <string name="show_answer_button">Show Answer</string>
     <string name="cheat_button">cheat!</string>
     <string name="judgment_toast">Cheating is wrong!</string>
-
+    <string name="a0">0</string>
+    <string name="a1">1</string>
+    <string name="a2">2</string>
+    <string name="a3">3</string>
+    <string name="ad">You cant cheat</string>
 </resources>
