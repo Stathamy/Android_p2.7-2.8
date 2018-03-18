@@ -1,8 +1,12 @@
 package com.example.admin.myapplication;
 /*
-*  time：2018-3-10  00：00
-*  dowhat：P61  3.7  3.8
+*  time：2018-3-18  23：21
+*  dowhat：  6.5
 *  author：Joe
+*  question：1.key-value之间的关系，如代码中：KEY_INDEX="index";之间的关系是什么，如何确定，如何使用
+*            2.翻转主屏幕时cheat的次数会重置且不会接着计次
+*           *3.连续点击NEXT时可以跳过cheat检查
+*            4.cheat之后再连续回答该问题就会连续减少cheat的次数
 * */
 import android.app.Activity;
 import android.content.Intent;
@@ -27,9 +31,12 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentIndex = 0;
     public int sur_t=3;
     public int has_t=0;
+
     private static final String TAG="MainActivity";
     private static final String KEY_INDEX="index";
     private static final String KEY_INDEX2="index2";
+    private static final String KEY_INDEX3="index3";
+    private static final String KEY_INDEX4="index4";
     private static final int REQUEST_CODE_CHEAT = 0;
     private boolean mIsCheater;
     private boolean mhas_t;
@@ -49,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(savedInstanceState);
         Log.i(TAG,"onSaveInstanceState");
         savedInstanceState.putInt(KEY_INDEX,mCurrentIndex);
+        //savedInstanceState.putInt(KEY_INDEX4,has_t);
         //savedInstanceState.putBoolean(KEY_INDEX2,mhas_t);//*****
     }
     @Override
@@ -75,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
             //防止用户作弊->旋转MainActivity:将mIsCheater传回
 
-            mIsCheater=savedInstanceState.getBoolean(KEY_INDEX,true);
-            mhas_t=savedInstanceState.getBoolean(KEY_INDEX,true);
+            mIsCheater=savedInstanceState.getBoolean(KEY_INDEX2,true);
+            mhas_t=savedInstanceState.getBoolean(KEY_INDEX3,true);
         }
         mTrueButton=(Button)findViewById(R.id.button3);
         mFalseButton=(Button)findViewById(R.id.button4);
@@ -121,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                checkAnswer(false);
                mQuestionBank[mCurrentIndex].setState(1);
+
             }
         });
         mNextButton.setOnClickListener(new View.OnClickListener() {
@@ -146,8 +155,12 @@ public class MainActivity extends AppCompatActivity {
 
         if(mIsCheater){
             if(!mhas_t){
-            has_t++;}
-            int a =sur_t-has_t;
+                if(!has_time){has_t++;}mQuestionBank[mCurrentIndex].setCheated(true);
+                //解决第四个问题，判断用户是否cheat过这个问题，如果没有，减少用户cheat的次数，
+                // 并将该题设置为被cheat过，再检查的时候会判断这个参数
+            }
+            int a;
+            a=sur_t-has_t;
             switch (a) {
                 case 0:
                     messageResId = R.string.a0;//sur_t-has_t/judgment_toast
